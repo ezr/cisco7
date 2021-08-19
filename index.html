@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<!-- thanks https://gist.github.com/jnovack/72b40da1005a97c5677533d59c73dbac -->
+<html>
+<head>
+<meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+<meta content="utf-8" http-equiv="encoding">
+<title>Cisco type 7</title>
+<style>
+</style>
+</head>
+
+<body>
+
+<input name="textbox1" type="text" />
+<input name="buttonExecute" onclick="crackPassword()" type="button" value="crack" />
+<br>
+<h2>Result:</h2>
+<p id="result"></p>
+
+<script>
+function crackPassword() {
+    var password = document.getElementsByName("textbox1")[0].value;
+    var crypttext = password.toUpperCase();
+    var plaintext = '';
+    var xlate = "dsfd;kfoA,.iyewrkldJKDHSUBsgvca69834ncxv9873254k;fg87";
+    var seed, i, val = 0;
+
+    if(crypttext.length & 1) {
+        document.getElementById('result').innerHTML = "AN ERROR OCCURRED!";
+        return;
+    }
+
+    seed = (crypttext.charCodeAt(0) - 0x30) * 10 + crypttext.charCodeAt(1) - 0x30;
+
+    if (seed > 15 || isNaN(crypttext.charAt(0)) || isNaN(crypttext.charAt(1))) {
+        document.getElementById('result').innerHTML = "AN ERROR OCCURRED!";
+        return;
+    }
+
+    for (i = 2 ; i <= crypttext.length; i++) {
+        if(i !=2 && !(i & 1)) {
+            plaintext += String.fromCharCode(val ^ xlate.charCodeAt(seed++));
+            seed %= xlate.length;
+            val = 0;
+        }
+
+        val *= 16;
+
+        if(!isNaN(crypttext.charAt(i))) {
+            val += crypttext.charCodeAt(i) - 0x30;
+            continue;
+        }
+
+        if(crypttext.charCodeAt(i) >= 0x41 && crypttext.charCodeAt(i) <= 0x46) {
+            val += crypttext.charCodeAt(i) - 0x41 + 0x0a;
+            continue;
+        }
+
+        if(crypttext.length != i) {
+            document.getElementById('result').innerHTML = "AN ERROR OCCURRED!";
+            return;
+        }
+    }
+
+    console.log(plaintext);
+    document.getElementById('result').innerHTML = plaintext;
+}
+</script>
+</body>
+</html>
